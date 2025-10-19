@@ -36,4 +36,4 @@ jobs:
           rsync -avz --delete \
             --exclude='.git' \
             --exclude='.github' \
-            out/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/qoochubc/iot.qoochub.com/public_html/
+            out/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/qoochubc/domains/iot.qoochub.com/public_html/
