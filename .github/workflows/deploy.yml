@@ -20,7 +20,7 @@ jobs:
 
       - name: Deploy code and Build on Server
         run: |
-          ssh -o StrictHostKeyChecking=no qoochubc@${{ secrets.STAGING_SERVER_IP }} << 'EOF_SERVER_OPS'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF_SERVER_OPS'
             cd /home/qoochubc/domains/iot.qoochub.com/public_html/
 
             git fetch origin main
