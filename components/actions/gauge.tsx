@@ -43,7 +43,8 @@ export function Gauge({ raw, data }: { raw: DriverType, data: PinType }) {
                 const updatedItem = { ...item, value: Number(result) };
                 setItem(updatedItem);
             } else {
-                throw new Error("ปลายทางปฏิเสธหรือติดต่อไม่ได้");
+                const result = await res.json();
+                toast.error("ปลายทางปฏิเสธหรือติดต่อไม่ได้", { description: result.error.message });
             }
         } catch (error) {
             console.error('Error:', error);

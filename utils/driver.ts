@@ -18,4 +18,15 @@ export class Driver{
         const result = await res.json();
         return result;
     }
+    static async deletePin(id: string, pinId: string){
+        const res = await fetch(`/api/driver/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: pinId
+        });
+        const result = await res.json();
+        return result;
+    }
 }

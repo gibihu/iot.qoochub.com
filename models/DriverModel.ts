@@ -63,8 +63,8 @@ export class Driver {
             type: data.type,
             pin: data.pin,
             value: data.value,
-            min_value: data.min_value,
-            max_value: data.max_value,
+            min_value: data.type == 'virtual' ? 0 : data.min_value,
+            max_value: data.type == 'virtual' ? 1 : data.max_value,
             property: property,
             created_at: now,
             updated_at: now,
@@ -96,7 +96,7 @@ export class Driver {
         if (itemIndex === -1) return null; // ถ้าไม่เจอ item
 
         const item = driver.items[itemIndex];
-        
+
         const property: PinPropertyType = {
             widget: data.widget ?? item.property.widget,
             color: data.color ?? item.property.color,
@@ -108,9 +108,9 @@ export class Driver {
             name: data.name ?? item.name,
             type: data.type ?? item.type,
             pin: data.pin ?? item.pin,
-            value: data.value ?? item.value,
-            min_value: data.min_value ?? item.min_value,
-            max_value: data.max_value ?? item.max_value,
+            value: data.type == 'virtual' ? (data.value <= 1 ? data.value : 0) : (data.value ?? item.min_value),
+            min_value: data.type == 'virtual' ? 0 : (data.min_value ?? item.min_value),
+            max_value: data.type == 'virtual' ? 1 : (data.max_value ?? item.max_value),
             property: property,
             updated_at: now,
             created_at: item.created_at,
@@ -132,6 +132,33 @@ export class Driver {
 
         return driver;
     }
+    static async deletePin(driv_id: string, pinId: string) {
+        const db = await this.readFile();
+        const now = new Date().toISOString();
+
+        // หา driver ตาม id
+        const driverIndex = db.findIndex((d) => d.id === driv_id);
+        if (driverIndex === -1) return null; // ถ้าไม่เจอ driver
+
+        const driver = db[driverIndex];
+
+        // หา item ตาม pinId
+        const itemIndex = driver.items.findIndex((i: any) => i.id === pinId);
+        if (itemIndex === -1) return null; // ถ้าไม่เจอ item
+
+        // ลบ item ออกจาก items
+        driver.items.splice(itemIndex, 1);
+
+        // อัปเดตเวลาล่าสุด
+        driver.updated_at = now;
+
+        // บันทึกกลับ
+        db[driverIndex] = driver;
+        await this.writeFile(db);
+
+        return driver;
+    }
+
 
 
 

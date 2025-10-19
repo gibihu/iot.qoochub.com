@@ -18,6 +18,9 @@ export function ToggleSwitch({ raw, data }: { raw: DriverType, data: PinType }) 
     useEffect(() => {
         setItem(data);
     }, [data]);
+    useEffect(() => {
+        setPpt(item.property);
+    }, [item]);
 
 
     const handleToggle = async (val: number) => {
@@ -32,7 +35,8 @@ export function ToggleSwitch({ raw, data }: { raw: DriverType, data: PinType }) 
                 handleUpdateDB(updatedItem);
             } else {
                 setIsOn(val === 0 ? true : false);
-                throw new Error("ปลายทางปฏิเสธหรือติดต่อไม่ได้");
+                const result = await res.json();
+                toast.error("ปลายทางปฏิเสธหรือติดต่อไม่ได้", { description: result.error.message });
             }
         } catch (error) {
             console.error('Error:', error);

@@ -96,3 +96,25 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         }, { status: 200 });
     }
 }
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+    try {
+        const { id } = context.params;
+        const pinId = await req.text();
+        const save = Driver.deletePin(id, pinId);
+        if (save) {
+            return NextResponse.json({
+                message: 'อัเดทฐานข้อมูล',
+                data: save,
+                code: 200
+            }, { status: 200 });
+        } else {
+            throw new Error("เกิดข้อมผิดพลาด ลองใหม่");
+        }
+    } catch (e) {
+        return NextResponse.json({
+            message: 'ไม่สำเร็จ',
+            error: e ?? 'ไม่พบหรือข้อมผิดพลาดในรบบ',
+            code: 200
+        }, { status: 200 });
+    }
+}

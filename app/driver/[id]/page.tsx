@@ -4,22 +4,24 @@ import { Gauge } from "@/components/actions/gauge";
 import { ToggleSwitch } from "@/components/actions/toggle-switch";
 import { ColorPicker } from "@/components/customs/color-picker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { hexToRgb } from "@/lib/color";
+import { timeSince } from "@/lib/time";
 import { cn } from "@/lib/utils";
 // app/user/[id]/page.tsx
 import { DriverType, PinType } from "@/types/driver";
 import { Driver } from "@/utils/driver";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Drone, LoaderCircle, Plus } from "lucide-react";
+import { Drone, LoaderCircle, Plus, Terminal } from "lucide-react";
 import { JSX, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -144,7 +146,8 @@ function AvtionArea({ raw, items, forceReGet }: { raw: DriverType, items: PinTyp
     const [isAddCardOpen, setIsAddCardOpen] = useState<boolean>(false);
     const [selectedItem, setSelectedItem] = useState<PinType>();
     const [reGet, setReGet] = useState<boolean>(false);
-    
+    const [isDeleteDilogOpen, setIsDeleteDilogOpen] = useState<boolean>(false);
+
     useEffect(() => {
         setChest(items);
     }, [items]);
@@ -180,6 +183,15 @@ function AvtionArea({ raw, items, forceReGet }: { raw: DriverType, items: PinTyp
                         >
                             แก้ไข
                         </ContextMenuItem>
+                        <ContextMenuItem
+                            className="cursor-pointer"
+                            onClick={() => {
+                                setSelectedItem(item);
+                                setIsDeleteDilogOpen(true);
+                            }}
+                        >
+                            ลบ
+                        </ContextMenuItem>
                     </ContextMenuContent>
                 </ContextMenu>
             ))}
@@ -193,6 +205,15 @@ function AvtionArea({ raw, items, forceReGet }: { raw: DriverType, items: PinTyp
                 forceReGet={setReGet}
                 mode="edit"
             />
+
+            <PinDelete
+                deviceId={raw.id}
+                data={selectedItem}
+                isOpen={isDeleteDilogOpen}
+                onOpenChange={setIsDeleteDilogOpen}
+                forceReGet={setReGet}
+             />
+            
         </div>
     );
 }
@@ -424,7 +445,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                                                     <FormItem className="w-2/3">
                                                         <FormLabel>value</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="ค่า" defaultValue={0} type="number" min={0} max={1} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                                            <Input placeholder="ค่า" type="number" defaultValue={field.value} min={0} max={1} onChange={(e) => field.onChange(Number(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -468,7 +489,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                                                     <FormItem className="w-2/3">
                                                         <FormLabel>value</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="ค่า" defaultValue={0} type="number" min={form.watch('min_value')} max={form.watch('max_value')} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                                            <Input placeholder="ค่า" type="number" defaultValue={field.value} min={form.watch('min_value')} max={form.watch('max_value')} onChange={(e) => field.onChange(Number(e.target.value))} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -588,5 +609,87 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
             </DialogContent>
         </Dialog>
 
+    );
+}
+
+function PinDelete({ deviceId, isOpen, onOpenChange, data, forceReGet }: PinFormProps): JSX.Element {
+    const [isDeleteDilogOpen, setIsDeleteDilogOpen] = useState<boolean>(false);
+    const [reGet, setReGet] = useState<boolean>(false);
+    const [isFetch, setIsFetch] = useState<boolean>(false);
+
+    useEffect(()=>{
+        setIsDeleteDilogOpen(isOpen);
+    },[isOpen]);
+    useEffect(()=>{
+        onOpenChange?.(isDeleteDilogOpen);
+    },[isDeleteDilogOpen]);
+    useEffect(()=>{
+        forceReGet?.(reGet);
+        setReGet(false);
+    },[reGet]);
+
+    const handleDelete = async () => {
+        if(data?.id){
+            setIsFetch(true);
+            try{
+                const res = await Driver.deletePin(deviceId, data.id);
+                const result = await res;
+                if (result.code === 200) {
+                    toast.success(result.message);
+                    setReGet(true);
+                    setIsDeleteDilogOpen(false);
+                } else {
+                    toast.error(result.message + ` #${result.code}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                let message = "เกิดข้อผิดพลาดบางอย่าง";
+
+                if (error instanceof Error) {
+                    message = error.message;
+                } else if (typeof error === "string") {
+                    message = error;
+                }
+                toast.error(message);
+            } finally {
+                setIsFetch(false);
+            }
+        }
+    }
+
+    return (
+        <Dialog open={isDeleteDilogOpen} onOpenChange={setIsDeleteDilogOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>ต้องการลบ {data?.name} หรือไม่</DialogTitle>
+                    <DialogDescription asChild className="text-accent-foreground">
+                        <Alert variant="default">
+                            <Terminal />
+                            <AlertTitle className="text-destructive">หากลบแล้วจะไม่สามารถกู้คืนได้</AlertTitle>
+                            <AlertDescription>
+                                <ul>
+                                    <li>คุณอยู่กับมันมา : {timeSince(data?.created_at ?? '')} ที่แล้ว</li>
+                                    <li>ครั้งล่าสุดที่คุณคุยกับมัน : {timeSince(data?.updated_at ?? '')} ที่แล้ว</li>
+                                </ul>
+                            </AlertDescription>
+                        </Alert>
+                    </DialogDescription>
+                    <DialogFooter>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="destructive" onClick={handleDelete}>
+                                    {isFetch && <LoaderCircle className="animate-spin" /> }
+                                    ยืนยัน
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>หวังว่าคุณไม่ลืมฉัน 😭</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </DialogFooter>
+                </DialogHeader>
+            </DialogContent>
+        </Dialog>
+        
     );
 }
