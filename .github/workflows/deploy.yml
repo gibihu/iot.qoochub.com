@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -26,7 +31,7 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          rsync -avz --delete \
+          rsync -avz -e "ssh -p 99 -i ~/.ssh/iot_key" \
             --exclude='.git' \
             --exclude='.github' \
             out/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/qoochubc/domains/iot.qoochub.com/public_html/
