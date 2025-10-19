@@ -24,9 +24,6 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Export static files (optional)
-        run: npm run export
-
       - name: Prepare SSH
         run: |
           mkdir -p ~/.ssh
