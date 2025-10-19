@@ -12,11 +12,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Test SSH access and deploy permissions
+        run: |
+          # ตรวจสอบว่า SSH connect ได้
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -p 99 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "echo 'SSH connection OK'" || exit 1
+
+          # ตรวจสอบว่าโฟลเดอร์ปลายทางมีสิทธิ์เขียน
+          ssh -p 99 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "test -w /home/qoochubc/domains/iot.qoochub.com/public_html" || exit 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,7 +39,7 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          rsync -avz -e "ssh -p 99 -i ~/.ssh/iot_key" \
+          rsync -avz -e "ssh -p 99" \
             --exclude='.git' \
             --exclude='.github' \
             out/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/qoochubc/domains/iot.qoochub.com/public_html/
