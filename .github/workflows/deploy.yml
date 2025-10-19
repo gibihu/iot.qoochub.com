@@ -24,13 +24,6 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Prepare SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/iot_key
-          chmod 600 ~/.ssh/iot_key
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-
       - name: Deploy to Server
         run: |
           rsync -avz --delete \
