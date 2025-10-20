@@ -1,6 +1,7 @@
 'use client'
 
 import { Gauge } from "@/components/actions/gauge";
+import { Slider } from "@/components/actions/slider";
 import { ToggleSwitch } from "@/components/actions/toggle-switch";
 import { ColorPicker } from "@/components/customs/color-picker";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -18,10 +19,11 @@ import { hexToRgb } from "@/lib/color";
 import { timeSince } from "@/lib/time";
 import { cn } from "@/lib/utils";
 // app/user/[id]/page.tsx
-import { DriverType, PinType } from "@/types/driver";
-import { Driver } from "@/utils/driver";
+import { DeviceType, PinType } from "@/types/device";
+import { Device } from "@/utils/device";
+import { Pin } from "@/utils/pin";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Drone, LoaderCircle, Plus, Terminal } from "lucide-react";
+import { Box, LoaderCircle, Plus, Terminal } from "lucide-react";
 import { JSX, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -57,7 +59,7 @@ const type_options = {
 export default function UserPage({ params }: { params: Promise<{ id: string }> }) {
     const unwrappedParams = use(params); // ✅ unwrap params
     const { id } = unwrappedParams;
-    const [driver, setDriver] = useState<DriverType>();
+    const [device, setdevice] = useState<DeviceType>();
     const [iseLoad, setIsLoad] = useState<boolean>(true);
     const [isFetch, setIsFetch] = useState<boolean>(true);
     const [reGet, setReGet] = useState<boolean>(false);
@@ -66,9 +68,9 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
         const fetchData = async () => {
             try {
                 setIsFetch(true);
-                const data = await Driver.find(id);
+                const data = await Device.find(id) as any;
                 console.log(data);
-                setDriver(data.data);
+                setdevice(data.data);
             } catch (error) {
                 console.error('Error:', error);
                 let message = "เกิดข้อผิดพลาดบางอย่าง";
@@ -103,19 +105,19 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
                 </div>
             ) : (
                 <div className="h-full flex flex-col gap-4">
-                    <Card className={cn("flex flex-row justify-between items-center  px-2 md:px-6", isFetch ? 'animate-pulse' : '')}>
+                    <Card className={cn("flex flex-row justify-between items-center  px-2 md:px-6 py-4 sticky top-5 ", isFetch ? 'animate-pulse' : '')}>
                         <div className="flex gap-2">
                             <Tooltip>
                                 <TooltipTrigger>
-                                    <Drone className="size-12  text-primary" />
+                                    <Box className="size-12  text-primary" />
                                 </TooltipTrigger>
                                 <TooltipContent>
                                     <p>500 Roblux</p>
                                 </TooltipContent>
                             </Tooltip>
                             <div className="flex flex-col gap-0">
-                                <span className="text-xl  font-bold">{driver?.name}</span>
-                                <span>{driver?.description}</span>
+                                <span className="text-xl  font-bold">{device?.name}</span>
+                                <span>{device?.description}</span>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -132,7 +134,7 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
                     </Card>
 
                     <div className="w-full h-full flex flex-col gap-4 items-center">
-                        {driver && (<AvtionArea raw={driver} items={driver?.items} forceReGet={e => setReGet(e)} />)}
+                        {device && (<AvtionArea raw={device} items={device?.items} forceReGet={e => setReGet(e)} />)}
                     </div>
 
                 </div>
@@ -141,7 +143,7 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
     );
 }
 
-function AvtionArea({ raw, items, forceReGet }: { raw: DriverType, items: PinType[], forceReGet?: (e: boolean) => void }) {
+function AvtionArea({ raw, items, forceReGet }: { raw: DeviceType, items: PinType[], forceReGet?: (e: boolean) => void }) {
     const [chest, setChest] = useState<PinType[]>(items as PinType[]);
     const [isAddCardOpen, setIsAddCardOpen] = useState<boolean>(false);
     const [selectedItem, setSelectedItem] = useState<PinType>();
@@ -158,15 +160,26 @@ function AvtionArea({ raw, items, forceReGet }: { raw: DriverType, items: PinTyp
     }, [reGet]);
 
     return (
-        <div className="w-full h-full flex flex-wrap gap-4 md:-space-y-24 justify-center items-start">
+        <div className="w-full h-full flex flex-wrap gap-4  justify-center items-start">
             {chest.map((item: PinType, key: number) => (
                 <ContextMenu key={key}>
-                    <ContextMenuTrigger className="size-50">
+                    <ContextMenuTrigger>
                         {(() => {
                             const ppt = item.property;
                             switch (ppt.widget) {
+                                case "slider":
+                                    return <Slider raw={raw} data={item} onChange={(updatedItem) =>
+                                        setChest(prev =>
+                                            prev.map(i => (i.id === updatedItem.id ? updatedItem : i))
+                                        )
+                                    }
+                                    />;
                                 case "gauge":
-                                    return <Gauge raw={raw} data={item} />;
+                                    return <Gauge raw={raw} data={item} onChange={(updatedItem) =>
+                                        setChest(prev =>
+                                            prev.map(i => (i.id === updatedItem.id ? updatedItem : i))
+                                        )}
+                                    />;
                                 default:
                                     return <ToggleSwitch raw={raw} data={item} />;
                             }
@@ -212,8 +225,8 @@ function AvtionArea({ raw, items, forceReGet }: { raw: DriverType, items: PinTyp
                 isOpen={isDeleteDilogOpen}
                 onOpenChange={setIsDeleteDilogOpen}
                 forceReGet={setReGet}
-             />
-            
+            />
+
         </div>
     );
 }
@@ -251,10 +264,11 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
         id: z.string().optional(),
         type: z.string().min(1, { message: "กรุณาเลือก" }),
         pin: z.string().min(1, { message: "กรุณาเลือก" }),
-        name: z.string().min(1, { message: "ไม่ใส่ชื่อปรับ 500 Roblux" }).max(20, { message: 'ความยาวต้องไม่เกิน 20 ตัวอักษร' }),
+        name: z.string().min(1, { message: "ไม่ใส่ชื่อปรับ 500 Roblux" }).max(50, { message: 'ความยาวต้องไม่เกิน 50 ตัวอักษร' }),
         value: z.number({ message: "ต้องเป็นตัวเลขเท่านั้น" }),
         min_value: z.number({ message: "ต้องเป็นตัวเลขเท่านั้น" }),
         max_value: z.number({ message: "ต้องเป็นตัวเลขเท่านั้น" }),
+        delay_sec: z.number({ message: "ต้องเป็นตัวเลขเท่านั้น" }).min(1, { message: "ความถี่ในการส่งต้องกำหนดอย่างน้อย 1 วินาที" }),
 
         // property
         widget: z.string().min(1, { message: "กรุณาเลือก" }),
@@ -278,6 +292,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
             color: '#16a34a',
             width: 1,
             height: 1,
+            delay_sec: 3,
         },
     });
 
@@ -297,9 +312,10 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                 color: ppt?.color ?? '#16a34a',
                 width: ppt?.width ?? 1,
                 height: ppt?.height ?? 1,
+                delay_sec: ppt?.delay_sec ?? 3,
             });
         }
-    }, [data, mode, deviceId]);
+    }, [data, mode]);
 
 
     function handleSubmit(data: FormValues) {
@@ -307,7 +323,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
         const fetchData = async () => {
             try {
                 setIsFormFetch(true);
-                const res = await fetch(`/api/driver/${deviceId}`, {
+                const res = await fetch(`/api/device/${deviceId}`, {
                     method: mode === 'create' ? 'POST' : 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -347,7 +363,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
 
     const widgetSelecter: { title: string, value: string }[] = [
         { title: 'สวิตซ์', value: 'switch' },
-        { title: 'สไลเดอร์ (รอ)', value: 'slider' },
+        { title: 'สไลเดอร์', value: 'slider' },
         { title: 'ตัวเลข (รอ)', value: 'number_input' },
         { title: 'เกจวัด', value: 'gauge' },
         { title: 'เกจวัดเรดาล (รอ)', value: 'radal_gauge' },
@@ -531,7 +547,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                                     <AccordionItem value="item-1">
                                         <AccordionTrigger>คุณสมบัติ</AccordionTrigger>
                                         <AccordionContent>
-                                            <div className="grid grid-cols-2 gap-2">
+                                            <div className="grid grid-cols-2 gap-2 px-2">
 
                                                 <FormField
                                                     control={form.control}
@@ -582,6 +598,24 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                                                         </FormItem>
                                                     )}
                                                 />
+                                                <FormField
+                                                    control={form.control}
+                                                    name="delay_sec"
+                                                    render={({ field }) => (
+                                                        <FormItem className="w-full col-span-2">
+                                                            <FormLabel>หน่วงวินาที</FormLabel>
+                                                            <FormControl>
+                                                                <Input
+                                                                    {...field}
+                                                                    type="number"
+                                                                    value={field.value}
+                                                                    onChange={e => field.onChange(Number(e.target.value))}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
 
                                             </div>
                                         </AccordionContent>
@@ -617,22 +651,22 @@ function PinDelete({ deviceId, isOpen, onOpenChange, data, forceReGet }: PinForm
     const [reGet, setReGet] = useState<boolean>(false);
     const [isFetch, setIsFetch] = useState<boolean>(false);
 
-    useEffect(()=>{
+    useEffect(() => {
         setIsDeleteDilogOpen(isOpen);
-    },[isOpen]);
-    useEffect(()=>{
+    }, [isOpen]);
+    useEffect(() => {
         onOpenChange?.(isDeleteDilogOpen);
-    },[isDeleteDilogOpen]);
-    useEffect(()=>{
+    }, [isDeleteDilogOpen]);
+    useEffect(() => {
         forceReGet?.(reGet);
         setReGet(false);
-    },[reGet]);
+    }, [reGet]);
 
     const handleDelete = async () => {
-        if(data?.id){
+        if (data?.id) {
             setIsFetch(true);
-            try{
-                const res = await Driver.deletePin(deviceId, data.id);
+            try {
+                const res = await Pin.delete(deviceId, data.id);
                 const result = await res;
                 if (result.code === 200) {
                     toast.success(result.message);
@@ -668,7 +702,7 @@ function PinDelete({ deviceId, isOpen, onOpenChange, data, forceReGet }: PinForm
                             <AlertTitle className="text-destructive">หากลบแล้วจะไม่สามารถกู้คืนได้</AlertTitle>
                             <AlertDescription>
                                 <ul>
-                                    <li>คุณอยู่กับมันมา : {timeSince(data?.created_at ?? '')} ที่แล้ว</li>
+                                    <li>คุณอยู่กับมันมา : {timeSince(data?.created_at ?? '')} แล้ว</li>
                                     <li>ครั้งล่าสุดที่คุณคุยกับมัน : {timeSince(data?.updated_at ?? '')} ที่แล้ว</li>
                                 </ul>
                             </AlertDescription>
@@ -678,7 +712,7 @@ function PinDelete({ deviceId, isOpen, onOpenChange, data, forceReGet }: PinForm
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="destructive" onClick={handleDelete}>
-                                    {isFetch && <LoaderCircle className="animate-spin" /> }
+                                    {isFetch && <LoaderCircle className="animate-spin" />}
                                     ยืนยัน
                                 </Button>
                             </TooltipTrigger>
@@ -690,6 +724,6 @@ function PinDelete({ deviceId, isOpen, onOpenChange, data, forceReGet }: PinForm
                 </DialogHeader>
             </DialogContent>
         </Dialog>
-        
+
     );
 }

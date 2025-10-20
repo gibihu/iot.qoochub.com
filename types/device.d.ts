@@ -1,7 +1,7 @@
 import { string } from "zod"
 
 
-export interface DriverType{
+export interface DeviceType{
     id: string;
     name: string;
     token: string;
@@ -30,4 +30,5 @@ export interface PinPropertyType {
     color: string;
     width: number;
     height: number;
+    delay_sec: number;
 }

@@ -1,0 +1,55 @@
+import { DeviceType } from "@/types/device";
+import fs from "fs";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+const FilePath = path.join(process.cwd(), "database", "devices.json");
+
+export class DeviceModel {
+
+    public static readFile(): DeviceType[] {
+        try {
+            const data = fs.readFileSync(FilePath, "utf-8");
+            return JSON.parse(data);
+        } catch {
+            return [];
+        }
+    }
+    public static writeFile(device: DeviceType[]) {
+        const dir = path.dirname(FilePath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(FilePath, JSON.stringify(device, null, 2));
+    }
+
+    static async createToken(token: string, name: string, description: string): Promise<DeviceType> {
+        const datas = this.readFile();
+        const now = new Date().toISOString();
+        // const hashed = await bcrypt.hash(token, 2);
+
+        const newData: DeviceType = {
+            id: uuidv4(),
+            name: name ?? "device_" + token,
+            token: token,
+            description: description,
+            items: [],
+            created_at: now,
+            updated_at: now,
+        };
+
+        datas.push(newData);
+        this.writeFile(datas);
+        return newData;
+    }
+
+
+
+
+    static get() {
+        return this.readFile();
+    }
+
+    static find(id: string) {
+        return this.readFile().find((u) => u.id === id);
+    }
+}

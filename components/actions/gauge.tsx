@@ -1,12 +1,13 @@
-import { DriverType, PinPropertyType, PinType } from "@/types/driver";
+import { DeviceType, PinPropertyType, PinType } from "@/types/device";
 import { TrendingUp } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "../ui/context-menu";
 import { hexToRgb } from "@/lib/color";
 import { toast } from "sonner";
+import { Pin } from "@/utils/pin";
 
 
 
@@ -14,25 +15,29 @@ export const description = "A radial chart with stacked sections"
 
 
 
-export function Gauge({ raw, data }: { raw: DriverType, data: PinType }) {
+export function Gauge({ raw, data, onChange }: { raw: DeviceType, data: PinType, onChange?: (e: PinType) => void }) {
     const [item, setItem] = useState<PinType>(data as PinType);
     const [isFetch, setIsFetch] = useState<boolean>(false);
     const [_token] = useState<string>(raw.token as string);
     const [ppt, setPpt] = useState<PinPropertyType>(item.property);
+    const [isFirst, setIsFirst] = useState<boolean>(true);
 
-    
+
     useEffect(() => {
         setItem(data);
     }, [data]);
+    useEffect(() => {
+        setPpt(item.property);
+    }, [item]);
 
     const chartConfig = {
-        mobile: {
+        device: {
             label: item.name,
             color: ppt.color,
         },
     } satisfies ChartConfig
 
-    const chartData = [{ month: "Now", index: item.value, max: item.max_value }]
+    const chartData = [{ month: "Now", index: item.value, max: item.max_value - item.value }]
     const totalVisitors = item.value;
 
     const handleUpdate = async () => {
@@ -42,9 +47,10 @@ export function Gauge({ raw, data }: { raw: DriverType, data: PinType }) {
                 const result = await res.text();
                 const updatedItem = { ...item, value: Number(result) };
                 setItem(updatedItem);
+                handleUpdateDB(updatedItem);
             } else {
                 const result = await res.json();
-                toast.error("ปลายทางปฏิเสธหรือติดต่อไม่ได้", { description: result.error.message });
+                toast.error("ปลายทางปฏิเสธหรือติดต่อไม่ได้", { description: result.error.message ?? '' });
             }
         } catch (error) {
             console.error('Error:', error);
@@ -58,16 +64,52 @@ export function Gauge({ raw, data }: { raw: DriverType, data: PinType }) {
             toast.error(message);
         }
     }
+    const handleUpdateDB = async (updatedItem: typeof item) => {
+        try {
+            setIsFetch(true);
+            const res = await Pin.update(raw, updatedItem);
+            const result = await res;
+            if (result.code == 200) {
+                onChange?.(updatedItem);
+                console.log(result.message);
+                // toast.success('บันทึกการเปลี่ยนแปลง');
+            } else {
+                toast.error(result.message + ` #${result.code}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            let message = "เกิดข้อผิดพลาดบางอย่าง";
+            if (error instanceof Error) {
+                message = error.message;
+            } else if (typeof error === "string") {
+                message = error;
+            }
+            toast.error(message);
+        } finally {
+            setIsFetch(false);
+        }
+    }
+
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        handleUpdate();
-        const interval = setInterval(() => {
-            handleUpdate();
-        }, (1000 * 60 * 1));
+        // เคลียร์ของเก่าก่อนทุกครั้ง
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
 
-        // cleanup เมื่อ component ถูก unmount
-        return () => clearInterval(interval);
-    }, []);
+        intervalRef.current = setInterval(() => {
+            handleUpdate();
+        }, 1000 * ppt.delay_sec);
+
+        // cleanup ตอน unmount
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, [ppt.delay_sec]);
+
 
     return (
         <Card
@@ -108,21 +150,22 @@ export function Gauge({ raw, data }: { raw: DriverType, data: PinType }) {
                                                 <tspan
                                                     x={viewBox.cx}
                                                     y={(viewBox.cy || 0) - 16}
-                                                    className="fill-foreground text-2xl font-bold"
+                                                    className="text-2xl font-bold"
+                                                    style={{
+                                                        fill: ppt.color,
+                                                    }}
                                                 >
                                                     {totalVisitors.toLocaleString()}
                                                 </tspan>
                                                 <tspan
                                                     x={viewBox.cx}
                                                     y={(viewBox.cy || 0) + 4}
-                                                    className="fill-muted-foreground"
                                                 >
                                                     {item.name}
                                                 </tspan>
                                                 <tspan
                                                     x={(viewBox.cx ?? 1) * 1.75}
                                                     y={(viewBox.cy || 0) + 20}
-                                                    className="fill-muted-foreground"
                                                 >
                                                     {item.max_value}
                                                 </tspan>

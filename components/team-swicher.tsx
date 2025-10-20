@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, Drone, LoaderCircle, Plus } from "lucide-react"
+import { Box, ChevronDown, LoaderCircle, Plus } from "lucide-react"
 import * as React from "react"
 
 import {
@@ -81,12 +81,12 @@ export function TeamSwitcher({
                         ))}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                            <DialogAddDriver className="w-full flex items-center gap-2 p-2">
+                            <DialogAdddevice className="w-full flex items-center gap-2 p-2">
                                 <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                                     <Plus className="size-4" />
                                 </div>
                                 <div className="text-muted-foreground font-medium">Add team</div>
-                            </DialogAddDriver>
+                            </DialogAdddevice>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -97,7 +97,7 @@ export function TeamSwitcher({
 
 
 
-function DialogAddDriver({ children, className, ...props }: React.ComponentProps<"div">) {
+function DialogAdddevice({ children, className, ...props }: React.ComponentProps<"div">) {
     return (
         <Dialog>
             <DialogTrigger className={cn(className)}>
@@ -107,7 +107,7 @@ function DialogAddDriver({ children, className, ...props }: React.ComponentProps
                 <DialogHeader>
                     <DialogTitle>เพิ่มอุปกรณ์</DialogTitle>
                     <DialogDescription asChild>
-                        <FormAddDriver />
+                        <FormAdddevice />
                     </DialogDescription>
                 </DialogHeader>
             </DialogContent>
@@ -116,7 +116,7 @@ function DialogAddDriver({ children, className, ...props }: React.ComponentProps
 }
 
 
-function FormAddDriver() {
+function FormAdddevice() {
 
     const [isFetch, setIsFetch] = React.useState<boolean>(false);
 
@@ -139,7 +139,7 @@ function FormAddDriver() {
         const fetchData = async () => {
             try {
                 setIsFetch(true);
-                const res = await fetch('/api/driver/data', {
+                const res = await fetch('/api/device/data', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ function FormAddDriver() {
                                         <TooltipTrigger asChild>
                                             <Button variant="outline" disabled={true} asChild>
                                                 <span>
-                                                    <Drone className="size-4 opacity-50" />
+                                                    <Box className="size-4 opacity-50" />
                                                 </span>
                                             </Button>
                                         </TooltipTrigger>

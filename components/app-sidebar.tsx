@@ -11,11 +11,11 @@ import {
   SidebarMenu
 } from "@/components/ui/sidebar";
 import { NavType } from "@/types/app";
-import { DriverType, PinType } from "@/types/driver";
-import { Driver } from "@/utils/driver";
+import { DeviceType, PinType } from "@/types/device";
 import { toast } from "sonner";
 import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-swicher";
+import { Device } from "@/utils/device";
 
 // This is sample data.
 const data = {
@@ -40,16 +40,16 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [drivers, setDrivers] = useState<DriverType[]>([]);
+  const [device, setdevice] = useState<DeviceType[]>([]);
   const [menuSider, setMenuSider] = useState<NavType>(data);
   const [isFetch, setIsFetch] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await Driver.get();
+        const data = await Device.get();
         console.log(data);
-        setDrivers(data.data as DriverType[]);
+        setdevice(data.data as DeviceType[]);
       } catch (error) {
         console.error('Error:', error);
         let message = "เกิดข้อผิดพลาดบางอย่าง";
@@ -69,10 +69,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, []);
 
   useEffect(() => {
-    if (drivers && drivers.length > 0) {
-      const tokenNav = drivers.map((driv: DriverType) => ({
+    if (device && device.length > 0) {
+      const tokenNav = device.map((driv: DeviceType) => ({
         title: driv.name,
-        url: `/driver/${driv.id}`,
+        url: `/device/${driv.id}`,
         items: driv.items.map((item: PinType) => ({
           title: item.name,
           url: "#"
@@ -94,7 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         });
       }
     }
-  }, [drivers]);
+  }, [device]);
 
   return (
     <Sidebar variant='floating' {...props}>

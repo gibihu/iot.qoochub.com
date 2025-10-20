@@ -1,11 +1,11 @@
 // app/api/hello/route.ts
-import { Driver } from "@/models/DriverModel";
+import { DeviceModel } from "@/models/DeviceModel";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
     return NextResponse.json({
         message: 'สำเร็จ',
-        data: Driver.get(),
+        data: DeviceModel.get(),
         code: 200
     }, {status: 200});
 }
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         const name = body.title;
         const token = body.token;
         const description = body.description;
-        const save = Driver.createToken(token, name, description);
+        const save = DeviceModel.createToken(token, name, description);
         if(save){
             return NextResponse.json({
                 message: 'สำเร็จ',

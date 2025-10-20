@@ -1,12 +1,13 @@
 // app/api/hello/route.ts
 //  PIN
-import { Driver } from "@/models/DriverModel";
+import { DeviceModel } from "@/models/DeviceModel";
+import { PinModel } from "@/models/PinModel";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET( req: NextRequest, context: any){
     const { id } = await context.params;
     try {
-        const data = Driver.find(id);
+        const data = DeviceModel.find(id);
         if (data) {
             return NextResponse.json({
                 message: 'สำเร็จ',
@@ -41,8 +42,9 @@ export async function POST(req: NextRequest, context: any) {
             color: body.color as string,
             width: body.width as number,
             height: body.height as number,
+            delay_sec: body.delay_sec as number,
         }
-        const save = Driver.addItem(id, data);
+        const save = PinModel.create(id, data);
         if (save) {
             return NextResponse.json({
                 message: 'สำเร็จ',
@@ -61,9 +63,9 @@ export async function POST(req: NextRequest, context: any) {
     }
 }
 
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: any) {
     try {
-        const { id } = context.params;
+        const { id } = await context.params;
         const body = await req.json();
         const data = {
             id: body.id ?? null,
@@ -77,8 +79,9 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
             color: body.color as string,
             width: body.width as number,
             height: body.height as number,
+            delay_sec: body.delay_sec as number,
         }
-        const save = Driver.update(id, data);
+        const save = PinModel.update(id, data);
         if (save) {
             return NextResponse.json({
                 message: 'อัเดทฐานข้อมูล',
@@ -96,11 +99,11 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
         }, { status: 200 });
     }
 }
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: any) {
     try {
-        const { id } = context.params;
+        const { id } = await context.params;
         const pinId = await req.text();
-        const save = Driver.deletePin(id, pinId);
+        const save = PinModel.delete(id, pinId);
         if (save) {
             return NextResponse.json({
                 message: 'อัเดทฐานข้อมูล',

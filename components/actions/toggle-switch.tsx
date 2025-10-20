@@ -1,14 +1,15 @@
 import { cn } from "@/lib/utils";
-import { DriverType, PinPropertyType, PinType } from "@/types/driver";
+import { DeviceType, PinPropertyType, PinType } from "@/types/device";
 import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Toggle } from "../ui/toggle";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "../ui/context-menu";
 import { hexToRgb } from "@/lib/color";
+import { Pin } from "@/utils/pin";
 
 
-export function ToggleSwitch({ raw, data }: { raw: DriverType, data: PinType }) {
+export function ToggleSwitch({ raw, data }: { raw: DeviceType, data: PinType }) {
     const [item, setItem] = useState<PinType>(data as PinType);
     const [isOn, setIsOn] = useState<boolean>(item.value == 0 ? false : true);
     const [isFetch, setIsFetch] = useState<boolean>(false);
@@ -36,7 +37,7 @@ export function ToggleSwitch({ raw, data }: { raw: DriverType, data: PinType }) 
             } else {
                 setIsOn(val === 0 ? true : false);
                 const result = await res.json();
-                toast.error("ปลายทางปฏิเสธหรือติดต่อไม่ได้", { description: result.error.message });
+                toast.error("ปลายทางปฏิเสธหรือติดต่อไม่ได้", { description: result.error.message ?? '' });
             }
         } catch (error) {
             console.error('Error:', error);
@@ -55,16 +56,11 @@ export function ToggleSwitch({ raw, data }: { raw: DriverType, data: PinType }) 
     const handleUpdateDB = async (updatedItem: typeof item) => {
         try {
             setIsFetch(true);
-            const res = await fetch(`/api/driver/${raw.id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatedItem)
-            });
-            const result = await res.json();
+            const res = await Pin.update(raw, updatedItem);
+            const result = await res;
             if (result.code == 200) {
-                toast.success(result.message);
+                console.log(result.message);
+                // toast.success('บันทึกการเปลี่ยนแปลง');
             } else {
                 toast.error(result.message + ` #${result.code}`);
             }
@@ -114,14 +110,20 @@ export function ToggleSwitch({ raw, data }: { raw: DriverType, data: PinType }) 
             }}
 
         >
-            <div className="w-full h-full flex flex-col justify-between">
+            <div className="w-full h-full flex flex-col">
                 <div className="flex justify-between items-center">
                     <span className="text-muted-foreground text-xs pt-2">{item.pin}</span>
                     {isFetch && (
                         <LoaderCircle className="size-4 animate-spin" />
                     )}
                 </div>
-                <span className="font-bold h-1/2 mb-2">{item.name ?? 'Switch'}</span>
+                <div className="h-full  flex flex-col justify-center  font-bold text-xl text-wrap  -mt-6">
+                    <span className=""
+                        style={{
+                            color: ppt.color,
+                        }}
+                    >{item.name ?? 'Switch'}</span>
+                </div>
             </div>
         </Toggle>
     );

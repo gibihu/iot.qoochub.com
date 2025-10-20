@@ -4,6 +4,19 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 First, run the development server:
 
+<!-- quiquick start -->
+``` bash
+npm install
+npm run dev
+```
+
+<!-- quiquick production -->
+``` bash
+npm install
+npm run build
+npm start
+```
+
 ```bash
 npm run dev
 # or
