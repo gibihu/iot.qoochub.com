@@ -17,6 +17,7 @@ export interface PinType {
     name: string;
     type: string;
     pin: string;
+    sort: number;
     value: number;
     min_value: number;
     max_value: number;

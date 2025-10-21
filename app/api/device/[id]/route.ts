@@ -2,6 +2,7 @@
 //  PIN
 import { DeviceModel } from "@/models/DeviceModel";
 import { PinModel } from "@/models/PinModel";
+import { PinType } from "@/types/device";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET( req: NextRequest, context: any){
@@ -104,6 +105,30 @@ export async function DELETE(req: NextRequest, context: any) {
         const { id } = await context.params;
         const pinId = await req.text();
         const save = PinModel.delete(id, pinId);
+        if (save) {
+            return NextResponse.json({
+                message: 'อัเดทฐานข้อมูล',
+                data: save,
+                code: 200
+            }, { status: 200 });
+        } else {
+            throw new Error("เกิดข้อมผิดพลาด ลองใหม่");
+        }
+    } catch (e) {
+        return NextResponse.json({
+            message: 'ไม่สำเร็จ',
+            error: e ?? 'ไม่พบหรือข้อมผิดพลาดในรบบ',
+            code: 200
+        }, { status: 200 });
+    }
+}
+
+
+export async function PUT(req: NextRequest, context: any) {
+    try {
+        const { id } = await context.params;
+        const body = await req.json() as PinType[];
+        const save = PinModel.updateAllItems(id, body);
         if (save) {
             return NextResponse.json({
                 message: 'อัเดทฐานข้อมูล',

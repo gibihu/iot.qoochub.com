@@ -113,7 +113,7 @@ export function Gauge({ raw, data, onChange }: { raw: DeviceType, data: PinType,
 
     return (
         <Card
-            className="flex flex-col  p-0 px-2  size-50 gap-1 rounded-lg shadow-xl"
+            className="flex flex-col  p-0 px-2  size-50 gap-1 rounded-lg shadow-xl cursor-default"
             style={{
                 background: `rgba(${hexToRgb(ppt.color)}, 0.1)`,
                 borderColor: ppt.color

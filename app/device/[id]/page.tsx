@@ -22,8 +22,22 @@ import { cn } from "@/lib/utils";
 import { DeviceType, PinType } from "@/types/device";
 import { Device } from "@/utils/device";
 import { Pin } from "@/utils/pin";
+import {
+    closestCenter,
+    DndContext,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    useSortable,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, LoaderCircle, Plus, Terminal } from "lucide-react";
+import { Box, GripHorizontal, GripVertical, LoaderCircle, Plus, Terminal } from "lucide-react";
 import { JSX, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -142,77 +156,169 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
         </div>
     );
 }
+function SortableItem({
+    item,
+    raw,
+    onEdit,
+    onDelete,
+    onChange,
+}: {
+    item: PinType;
+    raw: DeviceType;
+    onEdit: (item: PinType) => void;
+    onDelete: (item: PinType) => void;
+    onChange: (updatedItem: PinType) => void;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+        useSortable({ id: item.id });
 
-function AvtionArea({ raw, items, forceReGet }: { raw: DeviceType, items: PinType[], forceReGet?: (e: boolean) => void }) {
-    const [chest, setChest] = useState<PinType[]>(items as PinType[]);
-    const [isAddCardOpen, setIsAddCardOpen] = useState<boolean>(false);
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        cursor: "grab",
+    };
+
+    const ppt = item.property;
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes}>
+            <ContextMenu>
+                <ContextMenuTrigger>
+                    <div className="relative">
+                        {/* ปุ่มจับลาก */}
+                        <div
+                            {...listeners}
+                            className="absolute w-full  top-1  text-muted-foreground   flex justify-center"
+                            title="ลากเพื่อย้ายตำแหน่ง"
+                        >
+                            <GripHorizontal className="size-4 cursor-grab" />
+                        </div>
+
+                        {/* เนื้อหาปกติ */}
+                        {(() => {
+                            switch (ppt.widget) {
+                                case "slider":
+                                    return (
+                                        <Slider raw={raw} data={item} onChange={onChange} />
+                                    );
+                                case "gauge":
+                                    return (
+                                        <Gauge raw={raw} data={item} onChange={onChange} />
+                                    );
+                                default:
+                                    return <ToggleSwitch raw={raw} data={item} />;
+                            }
+                        })()}
+                    </div>
+                </ContextMenuTrigger>
+
+                <ContextMenuContent>
+                    <ContextMenuItem onClick={() => onEdit(item)}>แก้ไข</ContextMenuItem>
+                    <ContextMenuItem onClick={() => onDelete(item)}>ลบ</ContextMenuItem>
+                </ContextMenuContent>
+            </ContextMenu>
+        </div>
+    );
+}
+
+
+export function AvtionArea({
+    raw,
+    items,
+    forceReGet,
+}: {
+    raw: DeviceType;
+    items: PinType[];
+    forceReGet?: (e: boolean) => void;
+}) {
+    const [chest, setChest] = useState<PinType[]>(items);
+    const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+    const [isDeleteDilogOpen, setIsDeleteDilogOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState<PinType>();
-    const [reGet, setReGet] = useState<boolean>(false);
-    const [isDeleteDilogOpen, setIsDeleteDilogOpen] = useState<boolean>(false);
+    const [reGet, setReGet] = useState(false);
+
+    const sensors = useSensors(useSensor(PointerSensor));
+
 
     useEffect(() => {
-        setChest(items);
-    }, [items]);
+        // เรียงลำดับ items ตามค่า 'sort'
+        const sortedItems = [...items].sort((a, b) => a.sort - b.sort); // เรียงจากน้อยไปมาก
+
+        // อัพเดทค่าใน state chest
+        setChest(sortedItems);
+    }, [items]); // useEffect จะทำงานเมื่อ items เปลี่ยนแปลง
+
 
     useEffect(() => {
         forceReGet?.(reGet);
         setReGet(false);
     }, [reGet]);
 
-    return (
-        <div className="w-full h-full flex flex-wrap gap-4  justify-center items-start">
-            {chest.map((item: PinType, key: number) => (
-                <ContextMenu key={key}>
-                    <ContextMenuTrigger>
-                        {(() => {
-                            const ppt = item.property;
-                            switch (ppt.widget) {
-                                case "slider":
-                                    return <Slider raw={raw} data={item} onChange={(updatedItem) =>
-                                        setChest(prev =>
-                                            prev.map(i => (i.id === updatedItem.id ? updatedItem : i))
-                                        )
-                                    }
-                                    />;
-                                case "gauge":
-                                    return <Gauge raw={raw} data={item} onChange={(updatedItem) =>
-                                        setChest(prev =>
-                                            prev.map(i => (i.id === updatedItem.id ? updatedItem : i))
-                                        )}
-                                    />;
-                                default:
-                                    return <ToggleSwitch raw={raw} data={item} />;
-                            }
-                        })()}
-                    </ContextMenuTrigger>
+    const handleDragEnd = (event: any) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
 
-                    <ContextMenuContent>
-                        <ContextMenuItem
-                            className="cursor-pointer"
-                            onClick={() => {
+        setChest((prev) => {
+            const oldIndex = prev.findIndex((i) => i.id === active.id);
+            const newIndex = prev.findIndex((i) => i.id === over.id);
+            const newOrder = arrayMove(prev, oldIndex, newIndex);
+            // update sort
+            const updated = newOrder.map((p, index) => ({ ...p, sort: index + 1 }));
+            handleUpdateDBSort(updated);
+            return updated;
+        });
+    };
+
+    const handleUpdateDBSort = async (updated: PinType[]) => {
+        const res = await Pin.updateSort(raw, updated);
+        const result = await res as any;
+        if (result.code == 200) {
+            console.log(result.message);
+            // toast.success('บันทึกการเปลี่ยนแปลง');
+        } else {
+            toast.error(result.message + ` #${result.code}`);
+        }
+    }
+
+    return (
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+        >
+            <SortableContext
+                items={chest.map((i) => i.id)}
+                strategy={verticalListSortingStrategy}
+            >
+                <div className="w-full h-full flex flex-wrap gap-4 justify-center items-start">
+                    {chest.map((item) => (
+                        <SortableItem
+                            key={item.id}
+                            item={item}
+                            raw={raw}
+                            onChange={(updatedItem) =>
+                                setChest((prev) =>
+                                    prev.map((i) =>
+                                        i.id === updatedItem.id ? updatedItem : i
+                                    )
+                                )
+                            }
+                            onEdit={(item) => {
                                 setSelectedItem(item);
                                 setIsAddCardOpen(true);
                             }}
-                        >
-                            แก้ไข
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                            className="cursor-pointer"
-                            onClick={() => {
+                            onDelete={(item) => {
                                 setSelectedItem(item);
                                 setIsDeleteDilogOpen(true);
                             }}
-                        >
-                            ลบ
-                        </ContextMenuItem>
-                    </ContextMenuContent>
-                </ContextMenu>
-            ))}
+                        />
+                    ))}
+                </div>
+            </SortableContext>
 
-            {/* Dialog อยู่ข้างนอก ไม่อยู่ใน map */}
             <PinForm
                 deviceId={raw.id}
-                data={selectedItem} // ส่ง item ที่เลือกมา
+                data={selectedItem}
                 isOpen={isAddCardOpen}
                 onOpenChange={setIsAddCardOpen}
                 forceReGet={setReGet}
@@ -226,8 +332,7 @@ function AvtionArea({ raw, items, forceReGet }: { raw: DeviceType, items: PinTyp
                 onOpenChange={setIsDeleteDilogOpen}
                 forceReGet={setReGet}
             />
-
-        </div>
+        </DndContext>
     );
 }
 

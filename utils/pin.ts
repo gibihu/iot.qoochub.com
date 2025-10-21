@@ -24,4 +24,16 @@ export class Pin{
         const result = await res.json();
         return result;
     }
+    
+    static async updateSort(raw: DeviceType, updated: PinType[]){
+        const res = await fetch(`/api/device/${raw.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updated)
+        });
+        const result = await res.json();
+        return result;
+    }
 }

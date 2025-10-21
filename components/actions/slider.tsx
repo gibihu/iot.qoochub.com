@@ -137,7 +137,7 @@ export function Slider({ raw, data, onChange }: SliderProps) {
     const percentage = ((tempValue - min_value) / (max_value - min_value)) * 100;
 
     return (
-        <Card className="w-77 h-50  flex flex-col p-0 gap-0 shadow-xl border  rounded-md"
+        <Card className="w-77 h-50  flex flex-col p-0 gap-0 shadow-xl border  rounded-md  cursor-default"
             style={{
                 borderColor: ppt.color,
             }}
