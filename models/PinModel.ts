@@ -66,7 +66,7 @@ export class PinModel {
         // const maxItem = device.items.reduce((max, item) =>
         //     item.sort > max.sort ? item : max
         // )
-        const maxSort = Math.max(...device.items.map(i => Number(i.sort)));
+        const maxSort = data.sort ?? Math.max(...device.items.map(i => Number(i.sort)));
 
 
         const property: PinPropertyType = {

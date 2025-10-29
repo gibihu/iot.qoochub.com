@@ -20,7 +20,7 @@ import { timeSince } from "@/lib/time";
 import { cn } from "@/lib/utils";
 // app/user/[id]/page.tsx
 import { DeviceType, PinType } from "@/types/device";
-import { Device } from "@/utils/device";
+import { DeviceModel } from "@/utils/device";
 import { Pin } from "@/utils/pin";
 import {
     closestCenter,
@@ -82,7 +82,7 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
         const fetchData = async () => {
             try {
                 setIsFetch(true);
-                const data = await Device.find(id) as any;
+                const data = await DeviceModel.find(id) as any;
                 console.log(data);
                 setdevice(data.data);
             } catch (error) {
@@ -115,11 +115,11 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
         <div className="h-full">
             {iseLoad ? (
                 <div className="flex justify-center">
-                    <LoaderCircle className="size-4  animate-spin" />
+                    <LoaderCircle className="size-4  animate-spin text-primary" />
                 </div>
             ) : (
                 <div className="h-full flex flex-col gap-4">
-                    <Card className={cn("flex flex-row justify-between items-center  px-2 md:px-6 py-4 sticky top-5 ", isFetch ? 'animate-pulse' : '')}>
+                    <Card className={cn("flex flex-row justify-between items-center  px-2 md:px-6 py-4 sticky top-2  backdrop-blur bg-background/50 shadow-xl border-2 border-accent/20  z-50", isFetch ? 'animate-pulse' : '')}>
                         <div className="flex gap-2">
                             <Tooltip>
                                 <TooltipTrigger>
@@ -136,7 +136,7 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
                         </div>
                         <div className="flex gap-2">
                             <PinForm deviceId={id} isOpen={isAddCardOpen} onOpenChange={e => setIsAddCardOpen(e)} forceReGet={e => setReGet(e)}>
-                                <Button variant="outline_primary" className="size-10" onClick={() => setIsAddCardOpen(true)} disabled={isFetch}>
+                                <Button variant="outline_primary" className="size-10 bg-accent/50" onClick={() => setIsAddCardOpen(true)} disabled={isFetch}>
                                     {isFetch ? (
                                         <LoaderCircle className="size-6 animate-spin" />
                                     ) : (
@@ -345,11 +345,11 @@ interface PinFormProps {
     isOpen: boolean;
     onOpenChange?: (e: boolean) => void;
     data?: PinType;
-    mode?: 'create' | 'edit';
+    mode?: 'add' | 'edit';
     forceReGet?: (e: boolean) => void;
 }
 
-export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpenChange, data, mode = 'create', forceReGet }: PinFormProps): JSX.Element {
+export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpenChange, data, mode = 'add', forceReGet }: PinFormProps): JSX.Element {
     const [isFormFetch, setIsFormFetch] = useState<boolean>(false);
     const [reGet, setReGet] = useState<boolean>(false);
     const [isAddCardOpen, setIsAddCardOpen] = useState<boolean>(false);
@@ -380,6 +380,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
         color: z.string().min(1, { message: "กรุณาเลือก" }),
         width: z.number().min(1, { message: "กรุณาเลือก" }),
         height: z.number().min(1, { message: "กรุณาเลือก" }),
+        sort: z.number().optional(),
     });
     type FormValues = z.infer<typeof schema>;
     const ppt = data?.property ?? null;
@@ -403,7 +404,7 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
 
     // เมื่อ data พร้อม ค่อย reset ค่า
     useEffect(() => {
-        if (mode !== 'create' && data) {
+        if (mode !== 'add' && data) {
             const ppt = data.property;
             form.reset({
                 id: data.id,
@@ -423,17 +424,21 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
     }, [data, mode]);
 
 
-    function handleSubmit(data: FormValues) {
-        console.log(data);
+    function handleSubmit(fielData: FormValues) {
         const fetchData = async () => {
             try {
                 setIsFormFetch(true);
-                const res = await fetch(`/api/device/${deviceId}`, {
-                    method: mode === 'create' ? 'POST' : 'PATCH',
+                let payload = { ...fielData };
+
+                if (mode !== 'add') {
+                    payload.sort = data?.sort;
+                }
+                const res = await fetch(`/api/device/pin/${deviceId}`, {
+                    method: mode === 'add' ? 'POST' : 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await res.json();

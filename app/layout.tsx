@@ -52,14 +52,14 @@ export default function RootLayout({
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
                     <BreadcrumbLink asChild>
-                      <Link href="/">Dashboard</Link>
+                      <span>พื้นที่ทำงาน</span>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-              <Toaster position="top-center" />
+            <div className="flex flex-1 flex-col gap-4 p-4 pr-0 pt-0">
+              <Toaster position="bottom-left" />
               {children}
             </div>
           </SidebarInset>

@@ -82,9 +82,9 @@ export function ToggleSwitch({ raw, data }: { raw: DeviceType, data: PinType }) 
 
     useEffect(() => {
         if (!isOn) {
-            setbgColorHax(`rgba(${hexToRgb(ppt.color)}, 0)`);
+            setbgColorHax(`rgb(255, 255, 255, 1)`);
         } else {
-            setbgColorHax(`rgba(${hexToRgb(ppt.color)}, 0.2)`);
+            setbgColorHax(`rgba(${hexToRgb(ppt.color)}, 0.3)`);
         }
     }, [isOn]);
 
@@ -93,7 +93,7 @@ export function ToggleSwitch({ raw, data }: { raw: DeviceType, data: PinType }) 
 
         <Toggle
             className={cn(
-                "border flex flex-col items-center transition  bg-transparent hover:bg-background size-50 shadow-xl cursor-pointer",
+                "bg-background border flex flex-col items-center transition hover:bg-background size-50 shadow-xl cursor-pointer",
                 isOn ? "border  data-[state=on]:shadow-inner  shadow-zinc-500/50  scale-99" : ''
             )}
             disabled={isFetch}

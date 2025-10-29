@@ -3,7 +3,7 @@ import { DeviceType, PinType } from "@/types/device";
 
 export class Pin{
     static async delete(id: string, pinId: string){
-        const res = await fetch(`/api/device/${id}`, {
+        const res = await fetch(`/api/device/pin/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -14,7 +14,7 @@ export class Pin{
         return result;
     }
     static async update(raw: DeviceType, updatedItem: PinType){
-        const res = await fetch(`/api/device/${raw.id}`, {
+        const res = await fetch(`/api/device/pin/${raw.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ export class Pin{
     }
     
     static async updateSort(raw: DeviceType, updated: PinType[]){
-        const res = await fetch(`/api/device/${raw.id}`, {
+        const res = await fetch(`/api/device/pin/${raw.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

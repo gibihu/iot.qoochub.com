@@ -9,8 +9,7 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import {
     SidebarMenu,
@@ -18,7 +17,9 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { DeviceType } from "@/types/device"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import z from "zod"
@@ -35,7 +36,8 @@ export function TeamSwitcher({
     teams: {
         name: string
         logo: React.ElementType
-        plan: string
+        plan: string,
+        href: string,
     }[]
 }) {
     const [activeTeam, setActiveTeam] = React.useState(teams[0])
@@ -67,25 +69,26 @@ export function TeamSwitcher({
                             Teams
                         </DropdownMenuLabel>
                         {teams.map((team, index) => (
-                            <DropdownMenuItem
-                                key={team.name}
-                                onClick={() => setActiveTeam(team)}
-                                className="gap-2 p-2"
-                            >
-                                <div className="flex size-6 items-center justify-center rounded-xs border">
-                                    <team.logo className="size-4 shrink-0" />
-                                </div>
-                                {team.name}
-                                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                            </DropdownMenuItem>
+                            <Link href={team.href} key={team.name}>
+                                <DropdownMenuItem
+                                    onClick={() => setActiveTeam(team)}
+                                    className="gap-2 p-2"
+                                >
+                                    <div className="flex size-6 items-center justify-center rounded-xs border">
+                                        <team.logo className="size-4 shrink-0" />
+                                    </div>
+                                    {team.name}
+                                    {/* <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut> */}
+                                </DropdownMenuItem>
+                            </Link>
                         ))}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                            <DialogAdddevice className="w-full flex items-center gap-2 p-2">
+                            <DialogAdddevice className="w-full flex items-center gap-2 p-2 cursor-pointer">
                                 <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                                     <Plus className="size-4" />
                                 </div>
-                                <div className="text-muted-foreground font-medium">Add team</div>
+                                <div className="text-muted-foreground font-medium">เพิ่มอุปกรณ์</div>
                             </DialogAdddevice>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -96,8 +99,17 @@ export function TeamSwitcher({
 }
 
 
-
-function DialogAdddevice({ children, className, ...props }: React.ComponentProps<"div">) {
+type DialogAddDeviceProps = React.ComponentProps<"div"> & {
+    data?: DeviceType;   // กำหนดเป็น type ของคุณ
+    mode?: "add" | "edit";       // หรือ enum/string literal
+};
+export function DialogAdddevice({
+    data,
+    mode = 'add',
+    children,
+    className,
+    ...props
+}: DialogAddDeviceProps) {
     return (
         <Dialog>
             <DialogTrigger className={cn(className)}>
@@ -107,7 +119,7 @@ function DialogAdddevice({ children, className, ...props }: React.ComponentProps
                 <DialogHeader>
                     <DialogTitle>เพิ่มอุปกรณ์</DialogTitle>
                     <DialogDescription asChild>
-                        <FormAdddevice />
+                        <FormAdddevice data={data} mode={mode} />
                     </DialogDescription>
                 </DialogHeader>
             </DialogContent>
@@ -116,7 +128,7 @@ function DialogAdddevice({ children, className, ...props }: React.ComponentProps
 }
 
 
-function FormAdddevice() {
+function FormAdddevice({ data, mode }: { data?: DeviceType, mode?: 'add' | 'edit' }) {
 
     const [isFetch, setIsFetch] = React.useState<boolean>(false);
 
@@ -214,7 +226,7 @@ function FormAdddevice() {
                         <FormItem>
                             <FormLabel>รหัส token</FormLabel>
                             <FormControl>
-                                <Input placeholder="D4sxwuS4..." type="password" {...field} />
+                                <Input placeholder="D4sxwuS4..." type="text" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

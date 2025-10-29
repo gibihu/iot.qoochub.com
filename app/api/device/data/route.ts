@@ -9,6 +9,7 @@ export async function GET() {
         code: 200
     }, {status: 200});
 }
+
 export async function POST(req: NextRequest) {
     try{
         const body = await req.json();

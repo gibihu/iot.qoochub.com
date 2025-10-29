@@ -1,6 +1,6 @@
 'use client'
 
-import { AudioWaveform, Command, LoaderCircle } from "lucide-react";
+import { AudioWaveform, Bolt, Box, Command, LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import {
@@ -15,25 +15,22 @@ import { DeviceType, PinType } from "@/types/device";
 import { toast } from "sonner";
 import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-swicher";
-import { Device } from "@/utils/device";
+import { DeviceModel } from "@/utils/device";
 
 // This is sample data.
 const data = {
   teams: [
     {
-      name: "Acme Inc",
-      logo: Command,
+      name: "App",
+      logo: Box,
       plan: "Enterprise",
+      href: '/',
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: "Config",
+      logo: Bolt,
+      plan: "Enterprise",
+      href: "/configs",
     },
   ],
   navMain: [],
@@ -47,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await Device.get();
+        const data = await DeviceModel.get();
         console.log(data);
         setdevice(data.data as DeviceType[]);
       } catch (error) {

@@ -113,9 +113,9 @@ export function Gauge({ raw, data, onChange }: { raw: DeviceType, data: PinType,
 
     return (
         <Card
-            className="flex flex-col  p-0 px-2  size-50 gap-1 rounded-lg shadow-xl cursor-default"
+            className="flex flex-col  p-0 px-2  size-50 gap-1 rounded-lg shadow-xl cursor-default bg-background"
             style={{
-                background: `rgba(${hexToRgb(ppt.color)}, 0.1)`,
+                // background: `rgba(${hexToRgb(ppt.color)}, 0.3)`,
                 borderColor: ppt.color
             }}
         >
@@ -186,7 +186,7 @@ export function Gauge({ raw, data, onChange }: { raw: DeviceType, data: PinType,
                             dataKey="max"
                             stackId="a"
                             cornerRadius={5}
-                            fill="var(--background)"
+                            fill={`rgba(${hexToRgb(ppt.color)}, 0.2)`}
                             className="stroke-transparent stroke-2 "
                         />
                     </RadialBarChart>

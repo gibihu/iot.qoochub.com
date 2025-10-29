@@ -42,6 +42,50 @@ export class DeviceModel {
         return newData;
     }
 
+    static update(updateData: DeviceType): DeviceType | null {
+        const datas = this.readFile();
+        const index = datas.findIndex(d => d.id === updateData.id);
+
+        if (index === -1) {
+            return null; // or throw new Error("Device not found");
+        }
+
+        const oldData = datas[index];
+
+        // fields ห้ามเปลี่ยน
+        const immutableFields = {
+            id: oldData.id,
+            created_at: oldData.created_at,
+            items: oldData.items,
+        };
+
+        // เอาของใหม่มา merge ทับของเดิม (ยกเว้น field ห้ามแก้)
+        const newData: DeviceType = {
+            ...oldData,
+            ...updateData,
+            ...immutableFields,
+            updated_at: new Date().toISOString()
+        };
+
+        datas[index] = newData;
+        this.writeFile(datas);
+
+        return newData;
+    }
+
+    static delete(id: string): boolean {
+        const datas = this.readFile();
+        const index = datas.findIndex(d => d.id === id);
+
+        if (index === -1) {
+            return false; // หาของไม่เจอ ไม่ต้องลบ
+        }
+
+        datas.splice(index, 1);
+        this.writeFile(datas);
+
+        return true;
+    }
 
 
 
