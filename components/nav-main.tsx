@@ -46,7 +46,7 @@ export function NavMain({
                         </div>
                     </SidebarMenuButton>
                 </DialogAdddevice>
-                <Link href="/device/item/list">
+                <Link href="/device/list">
                     <SidebarMenuButton asChild tooltip="add" className="w-auto  bg-white/50  rounded-lg border font-bold h-10 cursor-pointer shadow-md">
                         <div className="flex gap-4 px-3">
                             <LayoutGrid />

@@ -79,7 +79,7 @@ function FormChangeBackground() {
     }
 
     return (
-        <Card className="px-4">
+        <Card className="px-4 backdrop-blur bg-background/50 shadow-xl border-2 border-accent/20">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
                     <FormField
@@ -122,7 +122,7 @@ function FormChangeBackground() {
                     </div>
 
                     <div className="flex justify-end">
-                        <Button type="submit" disabled={isFetch}>
+                        <Button type="submit" variant="primary" disabled={isFetch}>
                             {isFetch && <LoaderCircle className="animate-spin size-4" />}
                             บันทึก
                         </Button>

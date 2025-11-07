@@ -38,6 +38,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, GripHorizontal, GripVertical, LoaderCircle, Plus, Terminal } from "lucide-react";
+import Link from "next/link";
 import { JSX, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -121,14 +122,9 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
                 <div className="h-full flex flex-col gap-4">
                     <Card className={cn("flex flex-row justify-between items-center  px-2 md:px-6 py-4 sticky top-2  backdrop-blur bg-background/50 shadow-xl border-2 border-accent/20  z-50", isFetch ? 'animate-pulse' : '')}>
                         <div className="flex gap-2">
-                            <Tooltip>
-                                <TooltipTrigger>
-                                    <Box className="size-12  text-primary" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>500 Roblux</p>
-                                </TooltipContent>
-                            </Tooltip>
+                            <Link href={`/device/${id}/model`}>
+                                <Box className="size-12  text-primary" />
+                            </Link>
                             <div className="flex flex-col gap-0">
                                 <span className="text-xl  font-bold">{device?.name}</span>
                                 <span>{device?.description}</span>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu
@@ -16,6 +17,7 @@ import { toast } from "sonner";
 import { NavMain } from "./nav-main";
 import { TeamSwitcher } from "./team-swicher";
 import { DeviceModel } from "@/utils/device";
+import packageJson from '../package.json';
 
 // This is sample data.
 const data = {
@@ -111,6 +113,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <span className="text-muted-foreground text-end">v {packageJson.version}</span>
+      </SidebarFooter>
     </Sidebar>
   )
 }

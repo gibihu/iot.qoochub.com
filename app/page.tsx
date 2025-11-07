@@ -1,6 +1,6 @@
 "use client"
 
-import DeviceListPage from "./device/item/list/page"
+import DeviceListPage from "./device/list/page"
 
 export default function Page() {
   return (

@@ -65,9 +65,6 @@ export function TeamSwitcher({
                         side="bottom"
                         sideOffset={4}
                     >
-                        <DropdownMenuLabel className="text-muted-foreground text-xs">
-                            Teams
-                        </DropdownMenuLabel>
                         {teams.map((team, index) => (
                             <Link href={team.href} key={team.name}>
                                 <DropdownMenuItem
@@ -131,6 +128,7 @@ export function DialogAdddevice({
 function FormAdddevice({ data, mode }: { data?: DeviceType, mode?: 'add' | 'edit' }) {
 
     const [isFetch, setIsFetch] = React.useState<boolean>(false);
+    const [modelFile, setModelFile] = React.useState<File | null>(null);
 
     const schema = z.object({
         title: z.string().min(1, { message: "กรุณาเพิ่มหัวข้อมทีเด็ด" }).max(200, { message: 'ความยาวต้องไม่เกิน 200 ตัวอักษร' }),
@@ -147,16 +145,38 @@ function FormAdddevice({ data, mode }: { data?: DeviceType, mode?: 'add' | 'edit
         },
     });
 
+    // Validation สำหรับไฟล์ 3D
+    const validate3DFile = (file: File): boolean => {
+        const allowedExtensions = ['.gltf', '.glb', '.obj', '.fbx', '.dae', '.ply', '.stl', '.3ds', '.3mf'];
+        const fileName = file.name.toLowerCase();
+        const extension = fileName.substring(fileName.lastIndexOf('.'));
+        return allowedExtensions.includes(extension);
+    };
+
     function onSubmit(data: FormValues) {
         const fetchData = async () => {
             try {
                 setIsFetch(true);
+                
+                // สร้าง FormData สำหรับส่งข้อมูลและไฟล์
+                const formData = new FormData();
+                formData.append('title', data.title);
+                formData.append('token', data.token);
+                formData.append('description', data.description || '');
+                
+                // ถ้ามีไฟล์ให้ตรวจสอบและเพิ่ม
+                if (modelFile) {
+                    if (!validate3DFile(modelFile)) {
+                        toast.error('กรุณาอัพโหลดไฟล์ 3D เท่านั้น (.gltf, .glb, .obj, .fbx, .dae, .ply, .stl, .3ds, .3mf)');
+                        setIsFetch(false);
+                        return;
+                    }
+                    formData.append('model', modelFile);
+                }
+
                 const res = await fetch('/api/device/data', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
+                    body: formData
                 });
 
                 const result = await res.json();
@@ -245,10 +265,39 @@ function FormAdddevice({ data, mode }: { data?: DeviceType, mode?: 'add' | 'edit
                         </FormItem>
                     )}
                 />
-
+                <FormItem>
+                    <FormLabel>ไฟล์โมเดล 3D (ไม่บังคับ)</FormLabel>
+                    <FormControl>
+                        <Input
+                            type="file"
+                            accept=".gltf,.glb,.obj,.fbx,.dae,.ply,.stl,.3ds,.3mf"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    const allowedExtensions = ['.gltf', '.glb', '.obj', '.fbx', '.dae', '.ply', '.stl', '.3ds', '.3mf'];
+                                    const fileName = file.name.toLowerCase();
+                                    const extension = fileName.substring(fileName.lastIndexOf('.'));
+                                    if (allowedExtensions.includes(extension)) {
+                                        setModelFile(file);
+                                    } else {
+                                        toast.error('กรุณาอัพโหลดไฟล์ 3D เท่านั้น (.gltf, .glb, .obj, .fbx, .dae, .ply, .stl, .3ds, .3mf)');
+                                        e.target.value = '';
+                                        setModelFile(null);
+                                    }
+                                } else {
+                                    setModelFile(null);
+                                }
+                            }}
+                        />
+                    </FormControl>
+                    <FormDescription>
+                        รองรับไฟล์: .gltf, .glb, .obj, .fbx, .dae, .ply, .stl, .3ds, .3mf
+                        {modelFile && <span className="block mt-1 text-xs text-muted-foreground">ไฟล์ที่เลือก: {modelFile.name}</span>}
+                    </FormDescription>
+                </FormItem>
 
                 <div className="flex justify-end">
-                    <Button type="submit" disabled={isFetch}>
+                    <Button type="submit" variant="primary" disabled={isFetch}>
                         {isFetch && <LoaderCircle className="animate-spin size-4" />}
                         บันทึก
                     </Button>
