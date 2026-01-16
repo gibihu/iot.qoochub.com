@@ -1,6 +1,7 @@
 import { DeviceType, PinPropertyType, PinType } from "@/types/device";
 import { v4 as uuidv4 } from "uuid";
 import { DeviceModel } from "./DeviceModel";
+import { PinHistoryModel } from "./devices/pins/PinHistoryModel";
 
 
 export class PinModel {
@@ -104,8 +105,24 @@ export class PinModel {
         // เขียนกลับไฟล์
         await DeviceModel.writeFile(db);
 
+        const date = now.slice(0, 10);
+        const time = now.slice(11, 16);
+
+        PinHistoryModel.addChangeIf(
+            {
+                device_id: driv_id,
+                item_id: item.id,
+                date: date,
+            },
+            {
+                time: time,
+                value: updateData.value,
+            }
+        )
+
         return device;
     }
+
     static async delete(driv_id: string, pinId: string) {
         const db = await DeviceModel.readFile();
         const now = new Date().toISOString();
@@ -145,7 +162,7 @@ export class PinModel {
         const updatedItems: PinType[] = [];
 
         for (const updated of updates) {
-            const update =  updated as PinType;
+            const update = updated as PinType;
             const itemIndex = device.items.findIndex((i) => i.id === update.id);
             const ppt = update.property as PinPropertyType;
             if (itemIndex === -1) continue; // ถ้าไม่เจอ item ข้ามไป
@@ -189,6 +206,29 @@ export class PinModel {
             updated_count: updatedItems.length,
             updated_items: updatedItems,
         };
+    }
+
+    static async find(device_id: string, pin_id: string, hide?: string[]): Promise<Partial<PinType> | null> {
+        const db = await DeviceModel.readFile();
+
+        // หา device ตาม id
+        const device = db.find((d) => d.id === device_id);
+        if (!device) return null; // ถ้าไม่เจอ device
+
+        // หา item (pin) ตาม pin_id
+        const item = device.items.find((i) => i.id === pin_id);
+        if (!item) return null;
+
+        // ถ้าไม่มี hide ให้คืนข้อมูลเต็ม
+        if (!hide || hide.length === 0) return item;
+
+        // ลบตัวแปรที่ระบุใน hide array
+        const result = { ...item };
+        hide.forEach((key) => {
+            delete result[key as keyof PinType];
+        });
+
+        return result;
     }
 
 }

@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 
-const FilePath = path.join(process.cwd(), "database", "devices.json");
+const FilePath = path.join(process.cwd(), "database/devices", "devices.json");
 const ShapesDir = path.join(process.cwd(), "public", "shapes");
 
 // Interface สำหรับรับข้อมูลไฟล์ (รองรับทั้ง browser File และ server Buffer)
@@ -258,7 +258,19 @@ export class DeviceModel {
         return this.readFile();
     }
 
-    static find(id: string) {
-        return this.readFile().find((u) => u.id === id);
+    static find(id: string, hide?: string[]): Partial<DeviceType> | undefined {
+        const device = this.readFile().find((u) => u.id === id);
+        if (!device) return undefined;
+
+        // ถ้าไม่มี hide ให้คืนข้อมูลเต็ม
+        if (!hide || hide.length === 0) return device;
+
+        // ลบตัวแปรที่ระบุใน hide array
+        const result = { ...device };
+        hide.forEach((key) => {
+            delete result[key as keyof DeviceType];
+        });
+
+        return result;
     }
 }

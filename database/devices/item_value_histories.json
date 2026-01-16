@@ -1,0 +1,88 @@
+[
+  {
+    "device_id": "bb7329bd-cb11-4db2-8f1d-23491d56fea8",
+    "items": [
+      {
+        "id": "fe9a4cf4-a6f4-4150-8440-565cc86c9158",
+        "records": [
+          {
+            "date": "2026-01-15",
+            "changes": [
+              {
+                "time": "09:27",
+                "value": 1
+              }
+            ],
+            "summary": {
+              "avg_value": 1,
+              "min_value": 1,
+              "max_value": 1,
+              "count": 1
+            },
+            "value_groups": [
+              {
+                "value": 1,
+                "count": 1
+              }
+            ]
+          },
+          {
+            "date": "2026-01-16",
+            "changes": [
+              {
+                "time": "10:55",
+                "value": 0
+              }
+            ],
+            "summary": {
+              "avg_value": 0,
+              "min_value": 0,
+              "max_value": 0,
+              "count": 1
+            },
+            "value_groups": [
+              {
+                "value": 0,
+                "count": 1
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "6ae88302-e8fa-4dda-b91a-45f37384adcc",
+        "records": [
+          {
+            "date": "2026-01-16",
+            "changes": [
+              {
+                "time": "10:35",
+                "value": 58
+              },
+              {
+                "time": "10:36",
+                "value": 83
+              }
+            ],
+            "summary": {
+              "avg_value": 70.5,
+              "min_value": 58,
+              "max_value": 83,
+              "count": 2
+            },
+            "value_groups": [
+              {
+                "value": 58,
+                "count": 1
+              },
+              {
+                "value": 83,
+                "count": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

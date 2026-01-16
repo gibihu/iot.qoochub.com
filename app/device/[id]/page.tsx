@@ -37,7 +37,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, GripHorizontal, GripVertical, LoaderCircle, Plus, Terminal } from "lucide-react";
+import { Box, History, GripHorizontal, GripVertical, LoaderCircle, Plus, Terminal } from "lucide-react";
 import Link from "next/link";
 import { JSX, use, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -131,6 +131,11 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
                             </div>
                         </div>
                         <div className="flex gap-2">
+                            <Link href={`/device/${id}/pin/overview`}>
+                                <Button className="size-10">
+                                    <History />
+                                </Button>
+                            </Link>
                             <PinForm deviceId={id} isOpen={isAddCardOpen} onOpenChange={e => setIsAddCardOpen(e)} forceReGet={e => setReGet(e)}>
                                 <Button variant="outline_primary" className="size-10 bg-accent/50" onClick={() => setIsAddCardOpen(true)} disabled={isFetch}>
                                     {isFetch ? (
@@ -152,6 +157,7 @@ export default function UserPage({ params }: { params: Promise<{ id: string }> }
         </div>
     );
 }
+
 function SortableItem({
     item,
     raw,

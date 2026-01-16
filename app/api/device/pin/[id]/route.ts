@@ -73,8 +73,8 @@ export async function PATCH(req: NextRequest, context: any) {
         return NextResponse.json({
             message: 'ไม่สำเร็จ',
             error: e ?? 'ไม่พบหรือข้อมผิดพลาดในรบบ',
-            code: 200
-        }, { status: 200 });
+            code: 500
+        }, { status: 500 });
     }
 }
 

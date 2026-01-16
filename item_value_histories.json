@@ -1,0 +1,25 @@
+[
+  {
+    "project_id": "bb7329bd-cb11-4db2-8f1d-23491d56fea8",
+    "item_id": "fe9a4cf4-a6f4-4150-8440-565cc86c9158",
+    "date": "2026-01-16",
+    "changes": [
+      {
+        "time": "15:15",
+        "value": 1
+      }
+    ],
+    "summary": {
+      "avg_value": 1,
+      "min_value": 1,
+      "max_value": 1,
+      "count": 1
+    },
+    "value_groups": [
+      {
+        "value": 1,
+        "count": 1
+      }
+    ]
+  }
+]
