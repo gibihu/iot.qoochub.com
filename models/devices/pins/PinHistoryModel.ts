@@ -230,4 +230,26 @@ export class PinHistoryModel {
         }
         return device.items
     }
+
+    static deleteItem(filter: { device_id: string; item_id: string }): boolean {
+        const data = this.read()
+
+        const device = data.find(d => d.device_id === filter.device_id)
+        if (!device) return false
+
+        const itemIndex = device.items.findIndex(i => i.id === filter.item_id)
+        if (itemIndex === -1) return false
+
+        // ลบ item
+        device.items.splice(itemIndex, 1)
+
+        // ถ้า device ไม่มี items แล้ว ให้ลบ device ด้วย (optional)
+        if (device.items.length === 0) {
+            const deviceIndex = data.findIndex(d => d.device_id === filter.device_id)
+            data.splice(deviceIndex, 1)
+        }
+
+        this.write(data)
+        return true
+    }
 }

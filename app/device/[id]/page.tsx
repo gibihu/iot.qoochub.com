@@ -537,53 +537,35 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                                     />
                                 </div>
 
-                                {select_type == 'virtual' ? (
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex gap-2">
-                                            <FormField
-                                                control={form.control}
-                                                name="pin"
-                                                render={({ field }) => (
-                                                    <FormItem className="w-1/3">
-                                                        <FormLabel>Pin</FormLabel>
-                                                        <FormControl>
-                                                            <Select
-                                                                onValueChange={(val) => field.onChange(val)}
-                                                                value={field.value.toString()}
-                                                                defaultValue={field.value.toString()}
-                                                            >
-                                                                <SelectTrigger className="w-full">
-                                                                    <SelectValue placeholder="Type" />
-                                                                </SelectTrigger>
-                                                                <SelectContent className="capitalize">
-                                                                    {type_options.virtual.map((value: string, index: number) => (
-                                                                        <SelectItem value={value ?? ''} key={index}>{value}</SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="value"
-                                                render={({ field }) => (
-                                                    <FormItem className="w-2/3">
-                                                        <FormLabel>value</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="ค่า" type="number" defaultValue={field.value} min={0} max={1} onChange={(e) => field.onChange(Number(e.target.value))} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col gap-4">
-                                        <div className="flex gap-2">
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex gap-2">
+                                        {select_type == 'virtual' ? (<FormField
+                                            control={form.control}
+                                            name="pin"
+                                            render={({ field }) => (
+                                                <FormItem className="w-1/3">
+                                                    <FormLabel>Pin</FormLabel>
+                                                    <FormControl>
+                                                        <Select
+                                                            onValueChange={(val) => field.onChange(val)}
+                                                            value={field.value.toString()}
+                                                            defaultValue={field.value.toString()}
+                                                        >
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder="Type" />
+                                                            </SelectTrigger>
+                                                            <SelectContent className="capitalize">
+                                                                {type_options.virtual.map((value: string, index: number) => (
+                                                                    <SelectItem value={value ?? ''} key={index}>{value}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        ) : (
                                             <FormField
                                                 control={form.control}
                                                 name="pin"
@@ -610,50 +592,50 @@ export function PinForm({ deviceId, onChange, onSubmit, children, isOpen, onOpen
                                                     </FormItem>
                                                 )}
                                             />
-                                            <FormField
-                                                control={form.control}
-                                                name="value"
-                                                render={({ field }) => (
-                                                    <FormItem className="w-2/3">
-                                                        <FormLabel>value</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="ค่า" type="number" defaultValue={field.value} min={form.watch('min_value')} max={form.watch('max_value')} onChange={(e) => field.onChange(Number(e.target.value))} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <FormField
-                                                control={form.control}
-                                                name="min_value"
-                                                render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormLabel>min</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="ค่า" defaultValue={form.watch('min_value')} type="number" onChange={(e) => field.onChange(Number(e.target.value))} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="max_value"
-                                                render={({ field }) => (
-                                                    <FormItem className="flex-1">
-                                                        <FormLabel>max</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="ค่า" defaultValue={form.watch('max_value')} type="number" onChange={(e) => field.onChange(Number(e.target.value))} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
+                                        )}
+                                        <FormField
+                                            control={form.control}
+                                            name="value"
+                                            render={({ field }) => (
+                                                <FormItem className="w-2/3">
+                                                    <FormLabel>value</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="ค่า" type="number" defaultValue={field.value} min={form.watch('min_value')} max={form.watch('max_value')} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
                                     </div>
-                                )}
+                                    <div className="flex gap-2">
+                                        <FormField
+                                            control={form.control}
+                                            name="min_value"
+                                            render={({ field }) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>min</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="ค่า" defaultValue={form.watch('min_value')} type="number" onChange={(e) => field.onChange(Number(e.target.value))} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="max_value"
+                                            render={({ field }) => (
+                                                <FormItem className="flex-1">
+                                                    <FormLabel>max</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="ค่า" defaultValue={form.watch('max_value')} type="number" onChange={(e) => field.onChange(Number(e.target.value))} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                </div>
 
                                 <Accordion type="single" collapsible>
                                     <AccordionItem value="item-1">

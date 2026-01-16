@@ -30,7 +30,7 @@
         "type": "analog",
         "pin": "A0",
         "sort": 0,
-        "value": 83,
+        "value": 74,
         "min_value": 0,
         "max_value": 100,
         "property": {
@@ -40,12 +40,12 @@
           "height": 1,
           "delay_sec": 3
         },
-        "updated_at": "2026-01-16T10:36:15.834Z",
+        "updated_at": "2026-01-16T12:49:40.484Z",
         "created_at": "2026-01-16T10:34:38.253Z"
       }
     ],
     "created_at": "2025-11-07T05:25:24.583Z",
-    "updated_at": "2026-01-16T10:55:08.622Z",
+    "updated_at": "2026-01-16T16:10:19.522Z",
     "model_path": "/bb7329bd-cb11-4db2-8f1d-23491d56fea8/Untitled_sun.glb",
     "model_name": "Untitled_sun.glb",
     "model_property": {
@@ -53,9 +53,9 @@
       "model_y": 0,
       "model_z": 0,
       "model_size": 1,
-      "cam_x": 2,
-      "cam_y": 2,
-      "cam_z": 2,
+      "cam_x": 0,
+      "cam_y": 0,
+      "cam_z": 0,
       "space_width": "100%",
       "space_height": "100%",
       "can_mouse": true,

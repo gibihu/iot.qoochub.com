@@ -1,7 +1,7 @@
+import { PinHistoryModel } from '@/models/devices/pins/PinHistoryModel';
 import { DeviceType, PinPropertyType, PinType } from "@/types/device";
 import { v4 as uuidv4 } from "uuid";
 import { DeviceModel } from "./DeviceModel";
-import { PinHistoryModel } from "./devices/pins/PinHistoryModel";
 
 
 export class PinModel {
@@ -31,8 +31,8 @@ export class PinModel {
             pin: data.pin,
             value: data.value,
             sort: maxSort,
-            min_value: data.type == 'virtual' ? 0 : data.min_value,
-            max_value: data.type == 'virtual' ? 1 : data.max_value,
+            min_value: data.min_value,
+            max_value: data.max_value,
             property: property,
             created_at: now,
             updated_at: now,
@@ -83,9 +83,9 @@ export class PinModel {
             type: data.type ?? item.type,
             pin: data.pin ?? item.pin,
             sort: maxSort,
-            value: data.type == 'virtual' ? (data.value <= 1 ? data.value : 0) : (data.value ?? item.min_value),
-            min_value: data.type == 'virtual' ? 0 : (data.min_value ?? item.min_value),
-            max_value: data.type == 'virtual' ? 1 : (data.max_value ?? item.max_value),
+            value: data.value ?? item.min_value,
+            min_value: data.min_value ?? item.min_value,
+            max_value: data.max_value ?? item.max_value,
             property: property,
             updated_at: now,
             created_at: item.created_at,
@@ -147,6 +147,11 @@ export class PinModel {
         db[deviceIndex] = device;
         await DeviceModel.writeFile(db);
 
+        PinHistoryModel.deleteItem({
+            device_id: driv_id,
+            item_id: pinId
+        });
+
         return device;
     }
 
@@ -183,11 +188,11 @@ export class PinModel {
                 type: update.type ?? item.type,
                 pin: update.pin ?? item.pin,
                 sort: update.sort ?? item.sort, // ✅ ใช้ sort ที่ส่งมาจาก frontend
-                value: update.type == 'virtual' ? (update.value <= 1 ? update.value : 0) : (update.value ?? item.min_value),
+                value: update.value ?? item.min_value,
                 min_value:
-                    update.type == 'virtual' ? 0 : update.min_value ?? item.min_value,
+                    update.min_value ?? item.min_value,
                 max_value:
-                    update.type == 'virtual' ? 1 : update.max_value ?? item.max_value,
+                    update.max_value ?? item.max_value,
                 property,
                 updated_at: now,
                 created_at: item.created_at,
